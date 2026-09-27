@@ -4,13 +4,15 @@ fit-eyes: open source (MIT) interactive experiences on visual perception, hosted
 
 ## Current Status
 
-- Planning. Directory skeleton only; no code yet.
+- Phase 1 (scaffold) complete: router, home page with disclaimer, smoke tests. Next: phase 2 (grid, theme, calibration).
+- Commands: `README.md`.
 - Draft plan: `tmp/plan/index.md` (git-ignored, local only).
 - Deployment blocked on Cloudflare Pages support in cfops (`present-ops`).
 
 ## Stack
 
 - Vue 3 + Vite + TypeScript, `vue-router`. Runtime dependencies: `vue`, `vue-router` only. No state library.
+- TypeScript pinned to 6.0 (`vue-tsc` does not support TypeScript 7).
 - Bun for installs and scripts. Vitest (unit, `tests/unit/`), Playwright (end-to-end, `tests/e2e/`).
 - Code shared by all experiences in `src/shared/`; each experience in `src/experiences/<name>/`.
 

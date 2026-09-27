@@ -1,0 +1,28 @@
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --accent: #1f5fbf;
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --fg: #f2f2f2;
+    --accent: #7fb0ff;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.app {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
