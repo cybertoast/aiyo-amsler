@@ -1,24 +1,45 @@
-:root {
+:root,
+:root[data-theme='light'] {
   --bg: #ffffff;
   --fg: #111111;
   --accent: #1f5fbf;
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
+  --warning: #b36b00;
+  --border: #d0d0d0;
+  --grid-bg: #ffffff;
+  --grid-fg: #000000;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --fg: #f2f2f2;
-    --accent: #7fb0ff;
-  }
+:root[data-theme='dark'] {
+  --bg: #000000;
+  --fg: #f2f2f2;
+  --accent: #7fb0ff;
+  --warning: #ffb347;
+  --border: #333333;
+  --grid-bg: #000000;
+  --grid-fg: #ffffff;
+  color-scheme: dark;
+}
+
+:root {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
+}
+
+a {
+  color: var(--accent);
+}
+
+button {
+  font: inherit;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.75rem;
 }
 
 .app {

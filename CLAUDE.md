@@ -4,7 +4,7 @@ fit-eyes: open source (MIT) interactive experiences on visual perception, hosted
 
 ## Current Status
 
-- Phase 1 (scaffold) complete: router, home page with disclaimer, smoke tests. Next: phase 2 (grid, theme, calibration).
+- Phases 1–2 complete: scaffold, calibrated Amsler grid, light/dark theme, card calibration. Next: phase 3 (session model and URL/file encoding).
 - Commands: `README.md`.
 - Draft plan: `tmp/plan/index.md` (git-ignored, local only).
 - Deployment blocked on Cloudflare Pages support in cfops (`present-ops`).

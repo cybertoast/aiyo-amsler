@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
-import Disclaimer from '../../src/shared/components/Disclaimer.vue'
+import Disclaimer from '../../../src/shared/components/Disclaimer.vue'
 
 describe('Disclaimer', () => {
   it('states that the site is not a medical device', () => {
