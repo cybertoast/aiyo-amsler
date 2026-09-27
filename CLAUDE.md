@@ -4,9 +4,9 @@ fit-eyes: open source (MIT) interactive experiences on visual perception, hosted
 
 ## Current Status
 
-- Phases 1–2 complete: scaffold, calibrated Amsler grid, light/dark theme, card calibration. Next: phase 3 (session model and URL/file encoding).
+- Phases 1–3 complete: scaffold, calibrated grid, theme, calibration, session format with share link and file save/load (`/amsler/review`). Next: phase 4 (incremental test mode).
 - Commands: `README.md`.
-- Draft plan: `tmp/plan/index.md` (git-ignored, local only).
+- Draft plan: `tmp/plan/index.md` (git-ignored, local only). Backlog: `docs/backlog.md`.
 - Deployment blocked on Cloudflare Pages support in cfops (`present-ops`).
 
 ## Stack
@@ -29,7 +29,7 @@ fit-eyes: open source (MIT) interactive experiences on visual perception, hosted
 ## Amsler Experience
 
 - Grid: 20 × 20 squares, 5 mm each (100 mm side), center fixation dot. Rows `1`–`20`, columns `A`–`T`. Light or dark mode; optional row and column labels.
-- Session = one test: eye (`left`, `right`, `both`), one color, one timestamp. A repeat test is a new session.
+- Session = one test: eye (`left`, `right`, `both`), one color, one timestamp. A repeat test is a new session. Schema and validation: `src/experiences/amsler/lib/session-schema.ts` (source of truth for the format).
 - Incremental test: one cell at a time, sequential or random (seeded); colors mono (black on light, white on dark), red, green, blue; display mode colored cell (coordinate hidden) or coordinate label; scope full grid, region (quadrant or central 10×10), or random sample of N; responses clear / blurry / invisible via buttons or keys `1`/`2`/`3`.
 - Optional blood pressure entry before a test, with reuse of a reading from the last 60 minutes on the same device.
 - Review: share link, JSON download and upload, compare several sessions side by side, "next test" shortcut.

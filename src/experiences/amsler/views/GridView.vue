@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import AmslerGrid from '../components/AmslerGrid.vue'
 import CalibrationNotice from '../../../shared/components/CalibrationNotice.vue'
 import { useCalibration } from '../../../shared/composables/useCalibration'
@@ -20,6 +21,7 @@ watch(showLabels, (value) => writeJson(LABELS_KEY, value))
     <li>Cover one eye and look at the center dot.</li>
     <li>While looking at the dot, notice whether any lines look wavy, blurry, or missing.</li>
   </ul>
+  <p><RouterLink to="/amsler/review">Open a saved session</RouterLink></p>
   <label class="option">
     <input v-model="showLabels" type="checkbox" data-testid="toggle-labels" />
     Show row numbers and column letters
