@@ -1,0 +1,31 @@
+# Scratch, plans, logs
+tmp/
+logs/
+*.log
+
+# Dependencies and build output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Cloudflare / wrangler local state and secrets
+.wrangler/
+.dev.vars
+
+# Environment files
+.env
+.env.*
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
