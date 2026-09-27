@@ -8,6 +8,11 @@ export const router = createRouter({
     { path: '/calibrate', name: 'calibrate', component: () => import('./shared/views/CalibrateView.vue') },
     { path: '/amsler', name: 'amsler', component: () => import('./experiences/amsler/views/GridView.vue') },
     {
+      path: '/amsler/test',
+      name: 'amsler-test',
+      component: () => import('./experiences/amsler/views/TestView.vue'),
+    },
+    {
       path: '/amsler/review',
       name: 'amsler-review',
       component: () => import('./experiences/amsler/views/ReviewView.vue'),

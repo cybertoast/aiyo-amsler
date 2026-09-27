@@ -1,0 +1,83 @@
+import { expect, test } from '@playwright/test'
+
+test('sample test with keyboard answers opens review with results', async ({ page }) => {
+  await page.goto('/amsler/test')
+  await page.getByTestId('eye-right').check()
+  await page.getByTestId('color-red').check()
+  await page.getByTestId('scope-sample').check()
+  await page.getByTestId('scope-sample-n').fill('5')
+  await page.getByTestId('session-name-input').fill('keyboard run')
+  await page.getByTestId('start-test').click()
+
+  await expect(page.getByTestId('progress')).toHaveText('1 / 5')
+  await expect(page.getByText('Cover your left eye.')).toBeVisible()
+  await page.keyboard.press('1')
+  await page.keyboard.press('2')
+  await page.keyboard.press('3')
+  await expect(page.getByTestId('progress')).toHaveText('4 / 5')
+  await page.keyboard.press('Backspace')
+  await expect(page.getByTestId('progress')).toHaveText('3 / 5')
+  await page.keyboard.press('3')
+  await page.keyboard.press('1')
+  await page.keyboard.press('1')
+
+  await expect(page).toHaveURL(/\/amsler\/review#s=/)
+  await expect(page.getByTestId('session-name')).toHaveText('keyboard run')
+  await expect(page.getByTestId('session-eye')).toHaveText('right')
+  await expect(page.getByTestId('response-counts')).toHaveText('5 cells tested: 3 clear, 1 blurry, 1 invisible.')
+})
+
+test('label mode shows the coordinate in the test color, row by row', async ({ page }) => {
+  await page.goto('/amsler/test')
+  await page.getByTestId('color-red').check()
+  await page.getByTestId('mode-label').check()
+  await page.getByTestId('order-sequential').check()
+  await page.getByTestId('scope-region').check()
+  await page.getByTestId('scope-region-select').selectOption('NW')
+  await page.getByTestId('start-test').click()
+
+  const label = page.getByTestId('highlight-label')
+  await expect(label).toHaveText('A1')
+  await expect(label).toHaveAttribute('fill', '#ff0000')
+  await expect(page.getByTestId('highlight-cell')).toHaveCount(0)
+  await page.getByTestId('answer-clear').click()
+  await expect(label).toHaveText('B1')
+  await expect(page.getByTestId('progress')).toHaveText('2 / 100')
+})
+
+test('cell mode highlights without a label; pause hides the highlight', async ({ page }) => {
+  await page.goto('/amsler/test')
+  await page.getByTestId('mode-cell').check()
+  await page.getByTestId('color-blue').check()
+  await page.getByTestId('start-test').click()
+
+  await expect(page.getByTestId('highlight-cell')).toHaveAttribute('fill', '#0050ff')
+  await expect(page.getByTestId('highlight-label')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(page.getByTestId('highlight-cell')).toHaveCount(0)
+  await expect(page.getByTestId('answer-clear')).toBeDisabled()
+  await page.keyboard.press('1')
+  await expect(page.getByTestId('progress')).toHaveText('1 / 400')
+  await page.keyboard.press('Escape')
+  await expect(page.getByTestId('highlight-cell')).toHaveCount(1)
+})
+
+test('mono color is white on the dark theme', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.goto('/amsler/test')
+  await page.getByTestId('color-mono').check()
+  await page.getByTestId('mode-label').check()
+  await page.getByTestId('start-test').click()
+  const fill = await page.getByTestId('highlight-label').evaluate((el) => getComputedStyle(el).fill)
+  expect(fill).toBe('rgb(255, 255, 255)')
+})
+
+test('setup choices are remembered on this device', async ({ page }) => {
+  await page.goto('/amsler/test')
+  await page.getByTestId('eye-both').check()
+  await page.getByTestId('color-green').check()
+  await page.getByTestId('start-test').click()
+  await page.goto('/amsler/test')
+  await expect(page.getByTestId('eye-both')).toBeChecked()
+  await expect(page.getByTestId('color-green')).toBeChecked()
+})

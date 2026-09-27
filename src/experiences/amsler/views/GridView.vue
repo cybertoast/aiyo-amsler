@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import AmslerGrid from '../components/AmslerGrid.vue'
 import CalibrationNotice from '../../../shared/components/CalibrationNotice.vue'
 import { useCalibration } from '../../../shared/composables/useCalibration'
-import { readJson, writeJson } from '../../../shared/lib/storage'
+import { useAmslerPreferences } from '../composables/useAmslerPreferences'
 
-const LABELS_KEY = 'fit-eyes.amsler.showLabels'
 const { pxPerMm } = useCalibration()
-const showLabels = ref(readJson<boolean>(LABELS_KEY) === true)
-watch(showLabels, (value) => writeJson(LABELS_KEY, value))
+const { showLabels } = useAmslerPreferences()
 </script>
 
 <template>
@@ -21,7 +18,10 @@ watch(showLabels, (value) => writeJson(LABELS_KEY, value))
     <li>Cover one eye and look at the center dot.</li>
     <li>While looking at the dot, notice whether any lines look wavy, blurry, or missing.</li>
   </ul>
-  <p><RouterLink to="/amsler/review">Open a saved session</RouterLink></p>
+  <p class="links">
+    <RouterLink to="/amsler/test">Start an incremental test</RouterLink>
+    <RouterLink to="/amsler/review">Open a saved session</RouterLink>
+  </p>
   <label class="option">
     <input v-model="showLabels" type="checkbox" data-testid="toggle-labels" />
     Show row numbers and column letters
@@ -37,6 +37,11 @@ watch(showLabels, (value) => writeJson(LABELS_KEY, value))
   justify-content: center;
   padding: 1rem 0;
   overflow-x: auto;
+}
+.links {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 .option {
   display: inline-flex;

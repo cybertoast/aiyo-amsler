@@ -4,7 +4,7 @@ fit-eyes: open source (MIT) interactive experiences on visual perception, hosted
 
 ## Current Status
 
-- Phases 1–3 complete: scaffold, calibrated grid, theme, calibration, session format with share link and file save/load (`/amsler/review`). Next: phase 4 (incremental test mode).
+- Phases 1–4 complete: scaffold, calibrated grid, theme, calibration, session share link and file save/load (`/amsler/review`), incremental test (`/amsler/test`). Next: phase 5 (spoken prompts, blood pressure, results grid, compare, next-test shortcut).
 - Commands: `README.md`.
 - Draft plan: `tmp/plan/index.md` (git-ignored, local only). Backlog: `docs/backlog.md`.
 - Deployment blocked on Cloudflare Pages support in cfops (`present-ops`).
