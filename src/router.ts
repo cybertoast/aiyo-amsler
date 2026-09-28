@@ -17,6 +17,11 @@ export const router = createRouter({
       name: 'amsler-review',
       component: () => import('./experiences/amsler/views/ReviewView.vue'),
     },
+    {
+      path: '/amsler/compare',
+      name: 'amsler-compare',
+      component: () => import('./experiences/amsler/views/CompareView.vue'),
+    },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

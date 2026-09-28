@@ -4,7 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import Disclaimer from '../../../shared/components/Disclaimer.vue'
 import SessionActions from '../../../shared/components/SessionActions.vue'
 import SessionFileInput from '../../../shared/components/SessionFileInput.vue'
-import { decodePayload, encodePayload, payloadFromHash, PAYLOAD_PARAM, shareUrl } from '../../../shared/lib/session-codec'
+import { compareHash, decodePayload, encodePayload, payloadFromHash, PAYLOAD_PARAM, shareUrl } from '../../../shared/lib/session-codec'
+import { formatBloodPressure } from '../../../shared/lib/blood-pressure'
+import ResultsGrid from '../components/ResultsGrid.vue'
+import { useAmslerPreferences } from '../composables/useAmslerPreferences'
 import { summarizeResponses } from '../lib/results'
 import { parseSessionFile, sessionFileName, sessionToFileJson, validateSession, type Session } from '../lib/session-schema'
 
@@ -12,7 +15,9 @@ const REVIEW_PATH = '/amsler/review'
 
 const route = useRoute()
 const router = useRouter()
+const { saveSetup } = useAmslerPreferences()
 const session = ref<Session | null>(null)
+const payload = ref('')
 const url = ref('')
 const error = ref('')
 
@@ -26,13 +31,30 @@ const scopeText = computed(() => {
 })
 
 async function show(value: Session): Promise<void> {
-  const payload = await encodePayload(value)
+  const encoded = await encodePayload(value)
   session.value = value
-  url.value = shareUrl(window.location.origin, REVIEW_PATH, payload)
+  payload.value = encoded
+  url.value = shareUrl(window.location.origin, REVIEW_PATH, encoded)
   error.value = ''
-  if (payloadFromHash(route.hash) !== payload) {
-    await router.replace({ path: REVIEW_PATH, hash: `#${PAYLOAD_PARAM}=${payload}` })
+  if (payloadFromHash(route.hash) !== encoded) {
+    await router.replace({ path: REVIEW_PATH, hash: `#${PAYLOAD_PARAM}=${encoded}` })
   }
+}
+
+/** Starts a new session with this session's settings; the user can change eye or color first. */
+function nextTest(): void {
+  const s = session.value
+  if (!s) return
+  saveSetup({ eye: s.eye, color: s.color, displayMode: s.displayMode, order: s.order, scope: s.scope })
+  void router.push('/amsler/test')
+}
+
+function compare(): void {
+  void router.push({ path: '/amsler/compare', hash: compareHash([payload.value]) })
+}
+
+function print(): void {
+  window.print()
 }
 
 async function loadFromHash(hash: string): Promise<void> {
@@ -73,15 +95,12 @@ watch(() => route.hash, loadFromHash, { immediate: true })
       <dt>Scope</dt><dd>{{ scopeText }}</dd>
       <template v-if="session.bloodPressure">
         <dt>Blood pressure</dt>
-        <dd>
-          {{ session.bloodPressure.systolic }}/{{ session.bloodPressure.diastolic }} mmHg<template
-            v-if="session.bloodPressure.pulse">, pulse {{ session.bloodPressure.pulse }}</template>,
-          taken {{ session.bloodPressure.takenAt }}
-        </dd>
+        <dd data-testid="session-bp">{{ formatBloodPressure(session.bloodPressure) }}, taken {{ session.bloodPressure.takenAt }}</dd>
       </template>
     </dl>
 
     <h3>Responses</h3>
+    <ResultsGrid :responses="session.responses" />
     <p data-testid="response-counts">
       {{ summary.tested }} cells tested: {{ summary.counts.clear }} clear, {{ summary.counts.blurry }} blurry,
       {{ summary.counts.invisible }} invisible.
@@ -93,13 +112,19 @@ watch(() => route.hash, loadFromHash, { immediate: true })
       <p class="notes">{{ session.notes }}</p>
     </template>
 
-    <h3>Save or share</h3>
+    <div class="next no-print">
+      <button type="button" data-testid="next-test" @click="nextTest">Next test with these settings</button>
+      <button type="button" data-testid="compare" @click="compare">Compare with other sessions</button>
+      <button type="button" data-testid="print" @click="print">Print</button>
+    </div>
+
+    <h3 class="no-print">Save or share</h3>
     <SessionActions :url="url" :file-name="sessionFileName(session)" :file-content="sessionToFileJson(session, url)" />
   </template>
 
   <p v-else-if="!error">No session loaded. Open a share link, or open a saved file below.</p>
 
-  <h3>Open another session</h3>
+  <h3 class="no-print">Open another session</h3>
   <SessionFileInput @load="loadFromFile" />
 </template>
 
@@ -118,6 +143,12 @@ watch(() => route.hash, loadFromHash, { immediate: true })
 .error {
   border-left: 4px solid var(--warning);
   padding: 0.5rem 1rem;
+}
+.next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0;
 }
 .notes {
   white-space: pre-wrap;

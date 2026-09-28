@@ -4,9 +4,18 @@ import { REGIONS, NAME_MAX } from '../lib/session-schema'
 import { TEST_COLOR_NAMES } from '../lib/colors'
 import { CELL_COUNT } from '../lib/grid'
 import type { TestSetup } from '../composables/useAmslerPreferences'
+import BloodPressureForm from '../../../shared/components/BloodPressureForm.vue'
+import { useRecentBloodPressure } from '../../../shared/composables/useRecentBloodPressure'
+import { useSpeech } from '../../../shared/composables/useSpeech'
+import type { BloodPressure } from '../../../shared/lib/blood-pressure'
 
 const props = defineProps<{ initial: TestSetup }>()
-const emit = defineEmits<{ start: [setup: TestSetup, name: string] }>()
+const emit = defineEmits<{ start: [setup: TestSetup, name: string, bloodPressure: BloodPressure | null] }>()
+
+const speech = useSpeech()
+const recentBloodPressure = useRecentBloodPressure().recent()
+const bloodPressure = ref<BloodPressure | null>(null)
+const bloodPressureValid = ref(true)
 
 const eye = ref(props.initial.eye)
 const color = ref(props.initial.color)
@@ -29,7 +38,7 @@ const REGION_NAMES: Record<string, string> = {
 }
 
 function submit(): void {
-  if (scopeType.value === 'sample' && !sampleValid.value) return
+  if ((scopeType.value === 'sample' && !sampleValid.value) || !bloodPressureValid.value) return
   const scope =
     scopeType.value === 'full'
       ? ({ type: 'full' } as const)
@@ -40,6 +49,7 @@ function submit(): void {
     'start',
     { eye: eye.value, color: color.value, displayMode: displayMode.value, order: order.value, scope },
     name.value,
+    bloodPressure.value,
   )
 }
 </script>
@@ -92,12 +102,21 @@ function submit(): void {
       </label>
       <p v-if="scopeType === 'sample' && !sampleValid" class="field-error">Enter a number from 1 to {{ CELL_COUNT }}.</p>
     </fieldset>
+    <BloodPressureForm v-model="bloodPressure" v-model:valid="bloodPressureValid" :recent="recentBloodPressure" />
+    <fieldset>
+      <legend>Spoken prompts</legend>
+      <label>
+        <input v-model="speech.enabled.value" type="checkbox" :disabled="!speech.supported" data-testid="speech-enabled" />
+        Read instructions and prompts aloud (speech is generated on this device)
+      </label>
+      <p v-if="!speech.supported" class="field-error">This browser does not support speech.</p>
+    </fieldset>
     <label class="name">
       Session name (optional)
       <input v-model="name" type="text" :maxlength="NAME_MAX" placeholder="Generated from eye, color, and time" data-testid="session-name-input" />
       <small>Do not enter your own name or other personal details. Anyone with the link or file can read it.</small>
     </label>
-    <button type="submit" class="start" data-testid="start-test">Start test</button>
+    <button type="submit" class="start" data-testid="start-test" :disabled="!bloodPressureValid">Start test</button>
   </form>
 </template>
 

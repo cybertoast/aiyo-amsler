@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { defineComponent } from 'vue'
 import AmslerGrid from '../../../../src/experiences/amsler/components/AmslerGrid.vue'
 
 describe('AmslerGrid', () => {
@@ -67,5 +68,30 @@ describe('AmslerGrid highlight label size', () => {
     expect(Number(long.get('[data-testid="highlight-label"]').attributes('font-size'))).toBeLessThan(
       Number(short.get('[data-testid="highlight-label"]').attributes('font-size')),
     )
+  })
+})
+
+describe('AmslerGrid results', () => {
+  it('marks clear, blurry, and invisible cells, and leaves untested cells empty', () => {
+    const responses = 'cbi' + '.'.repeat(397)
+    const wrapper = mount(AmslerGrid, { props: { pxPerMm: 3, showLabels: false, results: responses } })
+    expect(wrapper.findAll('[data-result="clear"]')).toHaveLength(1)
+    expect(wrapper.findAll('[data-result="blurry"]')).toHaveLength(1)
+    expect(wrapper.findAll('[data-result="invisible"]')).toHaveLength(1)
+    expect(wrapper.get('[data-result="invisible"]').attributes('x')).toBe('10')
+  })
+
+  it('uses pattern ids unique to each grid on the same page', () => {
+    const Parent = defineComponent({
+      components: { AmslerGrid },
+      setup: () => ({ results: 'b'.repeat(400) }),
+      template: `<div>
+        <AmslerGrid :px-per-mm="3" :show-labels="false" :results="results" />
+        <AmslerGrid :px-per-mm="3" :show-labels="false" :results="results" />
+      </div>`,
+    })
+    const ids = mount(Parent).findAll('pattern').map((p) => p.attributes('id'))
+    expect(ids).toHaveLength(2)
+    expect(ids[0]).not.toBe(ids[1])
   })
 })

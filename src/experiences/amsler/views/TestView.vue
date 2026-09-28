@@ -7,15 +7,21 @@ import TestSetupForm from '../components/TestSetupForm.vue'
 import CalibrationNotice from '../../../shared/components/CalibrationNotice.vue'
 import { useCalibration } from '../../../shared/composables/useCalibration'
 import { useTheme } from '../../../shared/composables/useTheme'
+import { useRecentBloodPressure } from '../../../shared/composables/useRecentBloodPressure'
+import { useSpeech } from '../../../shared/composables/useSpeech'
+import type { BloodPressure } from '../../../shared/lib/blood-pressure'
 import { encodePayload, PAYLOAD_PARAM } from '../../../shared/lib/session-codec'
 import { ANSWER_KEYS, useAmslerTest } from '../composables/useAmslerTest'
 import { useAmslerPreferences, type TestSetup } from '../composables/useAmslerPreferences'
 import { TEST_COLOR_VALUES } from '../lib/colors'
+import { cellName } from '../lib/grid'
 
 const router = useRouter()
 const { pxPerMm } = useCalibration()
 const { theme } = useTheme()
 const { showLabels, loadSetup, saveSetup } = useAmslerPreferences()
+const speech = useSpeech()
+const recentBloodPressure = useRecentBloodPressure()
 const test = useAmslerTest()
 const { session, position, total, paused, finished, currentCell } = test
 
@@ -32,10 +38,26 @@ const coverText = computed(() => {
   return 'Keep both eyes open.'
 })
 
-function onStart(setup: TestSetup, name: string): void {
+function onStart(setup: TestSetup, name: string, bloodPressure: BloodPressure | null): void {
   saveSetup(setup)
-  test.start({ ...setup, theme: theme.value }, name)
+  if (bloodPressure) recentBloodPressure.remember(bloodPressure)
+  test.start({ ...setup, theme: theme.value }, name, bloodPressure ?? undefined)
 }
+
+/** "C7" is spoken as "C 7" so speech engines read a letter and a number. */
+function cellPrompt(cell: number): string {
+  if (session.value?.displayMode !== 'label') return 'Next cell.'
+  const name = cellName(cell)
+  return `Cell ${name[0]} ${name.slice(1)}.`
+}
+
+watch(currentCell, (cell) => {
+  if (cell === null) return
+  if (position.value === 0) {
+    speech.say(`${coverText.value} Look at the center dot. Press 1 for clear, 2 for blurry, 3 for invisible. ${cellPrompt(cell)}`)
+  } else speech.say(cellPrompt(cell))
+})
+watch(paused, (value) => speech.say(value ? 'Paused.' : 'Resumed.'))
 
 function onKeydown(event: KeyboardEvent): void {
   if (!running.value || event.metaKey || event.ctrlKey || event.altKey) return
@@ -49,12 +71,16 @@ function onKeydown(event: KeyboardEvent): void {
 
 watch(finished, async (done) => {
   if (!done || !session.value) return
+  speech.say('Test complete.')
   const payload = await encodePayload(session.value)
   await router.push({ path: '/amsler/review', hash: `#${PAYLOAD_PARAM}=${payload}` })
 })
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  speech.stop()
+})
 </script>
 
 <template>

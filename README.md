@@ -15,6 +15,11 @@ Interactive experiences on visual perception. Not a medical device; does not dia
 | `bun run build` | Production build to `dist/` |
 | `bun run serve:dist` | Serve `dist/` locally as Cloudflare Pages would (http://localhost:8788) |
 
+## Documentation
+
+- `docs/backlog.md`: remaining work and open decisions
+- `docs/deployment.md`: deployment to fit-eyes.nowpresent.co
+
 ## License
 
 MIT

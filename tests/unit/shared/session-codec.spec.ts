@@ -37,3 +37,18 @@ describe('session codec', () => {
     expect(payloadFromHash('#other=1')).toBeNull()
   })
 })
+
+describe('multiple payloads', () => {
+  it('reads every payload from a compare fragment', async () => {
+    const { payloadsFromHash, compareHash } = await import('../../../src/shared/lib/session-codec')
+    expect(payloadsFromHash(compareHash(['aa', 'bb']))).toEqual(['aa', 'bb'])
+    expect(payloadsFromHash('')).toEqual([])
+  })
+
+  it('extracts the payload from a pasted share link', async () => {
+    const { payloadFromLink } = await import('../../../src/shared/lib/session-codec')
+    expect(payloadFromLink('https://fit-eyes.nowpresent.co/amsler/review#s=abc')).toBe('abc')
+    expect(payloadFromLink('  https://x.test/a#s=abc  ')).toBe('abc')
+    expect(payloadFromLink('not a link')).toBeNull()
+  })
+})

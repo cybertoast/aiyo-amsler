@@ -61,4 +61,10 @@ describe('useAmslerTest', () => {
     expect(typeof test.session.value?.seed).toBe('number')
     expect(test.session.value?.name).toMatch(/^right-mono-\d{4}-\d{2}-\d{2}-\d{4}$/)
   })
+  it('stores an optional blood pressure reading in the session', () => {
+    const test = useAmslerTest()
+    const bp = { systolic: 120, diastolic: 80, takenAt: '2026-09-27T09:00:00+04:00' }
+    test.start(settings, '', bp)
+    expect(test.session.value?.bloodPressure).toEqual(bp)
+  })
 })

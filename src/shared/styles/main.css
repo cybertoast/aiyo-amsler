@@ -7,6 +7,10 @@
   --border: #d0d0d0;
   --grid-bg: #ffffff;
   --grid-fg: #000000;
+  --result-clear: #cfe8cf;
+  --result-blurry: #c98a00;
+  --result-blurry-bg: #fbe7b5;
+  --result-invisible: #b00020;
   color-scheme: light;
 }
 
@@ -18,6 +22,10 @@
   --border: #333333;
   --grid-bg: #000000;
   --grid-fg: #ffffff;
+  --result-clear: #1f4d1f;
+  --result-blurry: #ffb000;
+  --result-blurry-bg: #4d3800;
+  --result-invisible: #ff4d6a;
   color-scheme: dark;
 }
 
@@ -46,4 +54,16 @@ button {
   max-width: 48rem;
   margin: 0 auto;
   padding: 1rem;
+}
+
+@media print {
+  .site-header,
+  button,
+  .no-print {
+    display: none !important;
+  }
+  :root {
+    --bg: #ffffff;
+    --fg: #000000;
+  }
 }

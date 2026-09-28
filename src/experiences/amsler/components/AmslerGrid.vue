@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { CELL_MM, COLUMN_LABELS, GRID_CELLS, GRID_MM, ROW_LABELS, cellName } from '../lib/grid'
 
 export interface GridHighlight {
@@ -13,7 +13,21 @@ const props = defineProps<{
   pxPerMm: number
   showLabels: boolean
   highlight?: GridHighlight | null
+  /** Response string (c, b, i, .) to draw as results. */
+  results?: string
 }>()
+
+const patternId = `hatch-${useId()}`
+const RESULT_NAMES = { c: 'clear', b: 'blurry', i: 'invisible' } as const
+const resultCells = computed(() => {
+  const out: { x: number; y: number; result: (typeof RESULT_NAMES)[keyof typeof RESULT_NAMES] }[] = []
+  const results = props.results ?? ''
+  for (let i = 0; i < results.length; i++) {
+    const result = RESULT_NAMES[results[i] as keyof typeof RESULT_NAMES]
+    if (result) out.push({ x: (i % GRID_CELLS) * CELL_MM, y: Math.floor(i / GRID_CELLS) * CELL_MM, result })
+  }
+  return out
+})
 
 /** Space for labels, in mm, left of and above the grid. */
 const LABEL_MARGIN_MM = 6
@@ -49,7 +63,24 @@ const offsets = Array.from({ length: GRID_CELLS + 1 }, (_, i) => i * CELL_MM)
     role="img"
     aria-label="Amsler grid, 20 by 20 squares with a center dot"
   >
+    <defs v-if="results">
+      <pattern :id="patternId" patternUnits="userSpaceOnUse" width="1.25" height="1.25" patternTransform="rotate(45)">
+        <rect width="1.25" height="1.25" class="result-blurry-bg" />
+        <line x1="0" y1="0" x2="0" y2="1.25" class="result-blurry-line" stroke-width="0.5" />
+      </pattern>
+    </defs>
     <rect data-testid="grid-area" x="0" y="0" :width="GRID_MM" :height="GRID_MM" class="background" />
+    <rect
+      v-for="cell in resultCells"
+      :key="`${cell.x}-${cell.y}`"
+      :data-result="cell.result"
+      :x="cell.x"
+      :y="cell.y"
+      :width="CELL_MM"
+      :height="CELL_MM"
+      :class="`result-${cell.result}`"
+      :fill="cell.result === 'blurry' ? `url(#${patternId})` : undefined"
+    />
     <rect
       v-if="highlight && highlightBox && highlight.mode === 'cell'"
       data-testid="highlight-cell"
@@ -128,6 +159,18 @@ const offsets = Array.from({ length: GRID_CELLS + 1 }, (_, i) => i * CELL_MM)
 }
 line {
   stroke: currentColor;
+}
+.result-clear {
+  fill: var(--result-clear);
+}
+.result-blurry-bg {
+  fill: var(--result-blurry-bg);
+}
+.result-blurry-line {
+  stroke: var(--result-blurry);
+}
+.result-invisible {
+  fill: var(--result-invisible);
 }
 .dot,
 text:not([data-testid='highlight-label']) {

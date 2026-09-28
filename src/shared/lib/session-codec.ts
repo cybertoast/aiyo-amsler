@@ -68,3 +68,21 @@ export function payloadFromHash(hash: string): string | null {
   const params = new URLSearchParams(hash.replace(/^#/, ''))
   return params.get(PAYLOAD_PARAM)
 }
+
+/** All payloads in a fragment such as #s=a&s=b (used by the compare page). */
+export function payloadsFromHash(hash: string): string[] {
+  return new URLSearchParams(hash.replace(/^#/, '')).getAll(PAYLOAD_PARAM)
+}
+
+export function compareHash(payloads: string[]): string {
+  return '#' + payloads.map((p) => `${PAYLOAD_PARAM}=${p}`).join('&')
+}
+
+/** Payload from a pasted share link, or null if the text is not a link with a payload. */
+export function payloadFromLink(text: string): string | null {
+  try {
+    return payloadFromHash(new URL(text.trim()).hash)
+  } catch {
+    return null
+  }
+}

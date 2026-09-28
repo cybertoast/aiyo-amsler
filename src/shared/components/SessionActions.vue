@@ -29,7 +29,7 @@ function download(): void {
 </script>
 
 <template>
-  <section class="session-actions" aria-label="Save or share this session">
+  <section class="session-actions no-print" aria-label="Save or share this session">
     <label class="link-label" for="share-link">Share link (contains all session data)</label>
     <div class="row">
       <input id="share-link" ref="linkInput" data-testid="share-link" :value="url" readonly @focus="linkInput?.select()" />

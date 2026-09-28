@@ -1,5 +1,8 @@
 import { CELL_COUNT, GRID_MM, type Region } from './grid'
 import { isIsoDateTime, localDateParts, localIsoString } from '../../../shared/lib/time'
+import { BP_RANGES, type BloodPressure } from '../../../shared/lib/blood-pressure'
+
+export type { BloodPressure }
 
 export const SESSION_VERSION = 1
 export const EXPERIENCE_ID = 'amsler'
@@ -21,13 +24,6 @@ export type Scope = { type: 'full' } | { type: 'region'; region: Region } | { ty
 /** One character per cell, row-major A1..T20. */
 export const RESPONSE_CODES = { clear: 'c', blurry: 'b', invisible: 'i', untested: '.' } as const
 export const EMPTY_RESPONSES = RESPONSE_CODES.untested.repeat(CELL_COUNT)
-
-export interface BloodPressure {
-  systolic: number
-  diastolic: number
-  pulse?: number
-  takenAt: string
-}
 
 export interface SessionSettings {
   eye: Eye
@@ -102,11 +98,11 @@ function validateBloodPressure(value: unknown): BloodPressure {
   const bp = value as Record<string, unknown>
   if (!isIsoDateTime(bp.takenAt)) fail('bloodPressure.takenAt must be a date and time')
   const result: BloodPressure = {
-    systolic: intInRange(bp.systolic, 60, 260, 'bloodPressure.systolic'),
-    diastolic: intInRange(bp.diastolic, 30, 160, 'bloodPressure.diastolic'),
+    systolic: intInRange(bp.systolic, BP_RANGES.systolic.min, BP_RANGES.systolic.max, 'bloodPressure.systolic'),
+    diastolic: intInRange(bp.diastolic, BP_RANGES.diastolic.min, BP_RANGES.diastolic.max, 'bloodPressure.diastolic'),
     takenAt: bp.takenAt,
   }
-  if (bp.pulse !== undefined) result.pulse = intInRange(bp.pulse, 20, 250, 'bloodPressure.pulse')
+  if (bp.pulse !== undefined) result.pulse = intInRange(bp.pulse, BP_RANGES.pulse.min, BP_RANGES.pulse.max, 'bloodPressure.pulse')
   return result
 }
 

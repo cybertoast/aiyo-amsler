@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { buildSequence, needsSeed, newSeed } from '../lib/sequence'
-import { RESPONSE_CODES, createSession, type Session, type SessionSettings } from '../lib/session-schema'
+import { RESPONSE_CODES, createSession, type BloodPressure, type Session, type SessionSettings } from '../lib/session-schema'
 import { localIsoString } from '../../../shared/lib/time'
 
 export type Answer = 'clear' | 'blurry' | 'invisible'
@@ -22,7 +22,7 @@ export function useAmslerTest() {
   const finished = computed(() => session.value !== null && position.value >= total.value)
   const currentCell = computed(() => (finished.value ? null : (sequence.value[position.value] ?? null)))
 
-  function start(settings: SessionSettings, name?: string): void {
+  function start(settings: SessionSettings, name?: string, bloodPressure?: BloodPressure): void {
     const withSeed: SessionSettings =
       needsSeed(settings.scope, settings.order) && settings.seed === undefined
         ? { ...settings, seed: newSeed() }
@@ -30,6 +30,7 @@ export function useAmslerTest() {
     const created = createSession(withSeed)
     const trimmed = name?.trim()
     if (trimmed) created.name = trimmed
+    if (bloodPressure) created.bloodPressure = bloodPressure
     session.value = created
     sequence.value = buildSequence(withSeed.scope, withSeed.order, withSeed.seed)
     position.value = 0
